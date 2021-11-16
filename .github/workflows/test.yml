@@ -10,7 +10,8 @@ jobs:
 
       - run: python3 --version
 
-      - id: test-action
+      - name: ansible-action
+        id: test-action
         uses: ./
         with:
           python-version: '3.10'
