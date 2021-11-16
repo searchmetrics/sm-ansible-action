@@ -43,7 +43,7 @@ runs:
       run: venvansible/bin/pip install ansible awscli cfn-lint
       shell: bash
 
-    - id: venv-dir
+    - id: set-venv-dir
       run: echo "::set-output name=dir::$(echo venvansible)"
       shell: bash
 
