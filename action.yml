@@ -1,0 +1,68 @@
+name: 'SM Ansible Action'
+description: 'Ansible action that uses virtualenv and .netrc to configure authentication'
+inputs:
+  python-version:
+    description: 'python version for setup-python actinon'
+    required: false
+    default: '3.9'
+  netrc-token:
+    description: 'netrc token'
+    required: false
+    default: 'none'
+outputs:
+  venv-dir:
+    description: "virtualenv dir"
+    value: ${{ steps.set-venv-dir.outputs.dir }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cache/pip
+          ./venvansible
+        key: ${{ runner.os }}-pip-ansible
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+
+    - name: Install virtualenv
+      run: pip install virtualenv
+      shell: bash
+
+    - name: Create virtualenv dir
+      run: virtualenv venvansible
+      shell: bash
+
+    - name: Create virtualenv dir
+      run: venvansible/bin/pip install ansible awscli cfn-lint
+      shell: bash
+
+    - id: venv-dir
+      run: echo "::set-output name=dir::$(echo venvansible)"
+      shell: bash
+
+    - name: Config Github to use HTTPS
+      run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+      shell: bash
+
+    - name: create netrc file
+      run: echo "machine github.com login github-ci password ${{ inputs.netrc-token }}" > ~/.netrc
+      shell: bash
+
+    - name: update chmod
+      run: chmod 600 ~/.netrc
+      shell: bash
+
+    - name: Setting var
+      run: echo "ANSIBLE_PYTHON_INTERPRETER=python3" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Setting var
+      run: venvansible/bin/ansible --version
+      shell: bash
