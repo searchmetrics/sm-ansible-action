@@ -29,3 +29,8 @@ jobs:
         run: |
            source ${{ steps.test-action.outputs.venv-dir }}/bin/activate
            ansible --version
+      - name: testing separate commands source
+        run: source ${{ steps.test-action.outputs.venv-dir }}/bin/activate
+
+      - name: testing separate commands ansible
+        run: ansible --version
