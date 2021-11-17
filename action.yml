@@ -2,7 +2,7 @@ name: 'SM Ansible Action'
 description: 'Ansible action that uses virtualenv and .netrc to configure authentication'
 inputs:
   python-version:
-    description: 'python version for setup-python actinon'
+    description: 'python version for setup-python action'
     required: false
     default: '3.9'
   netrc-token:
@@ -20,6 +20,9 @@ outputs:
   ansible-bin:
     description: "virtualenv ansible bin"
     value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible'
+  ansible-playbook-bin:
+    description: "virtualenv ansible playbook bin"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-playbook'
   ansible-lint-bin:
     description: "virtualenv ansible-lint bin"
     value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-lint'
