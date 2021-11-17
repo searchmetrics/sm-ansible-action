@@ -16,21 +16,21 @@ jobs:
           python-version: '3.10'
           netrc-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: echo venv dir ${{ steps.test-action.outputs.venv-dir }}
-        shell: bash
-
       - run: python3 --version
 
       - run: echo $ANSIBLE_PYTHON_INTERPRETER
 
-      - run: ${{ steps.test-action.outputs.venv-dir }}/bin/ansible --version
+      - name: testing ansible bin output
+        run: ${{ steps.test-action.outputs.ansible-bin }} --version
 
-      - name: testing commands
-        run: |
-           source ${{ steps.test-action.outputs.venv-dir }}/bin/activate
-           ansible --version
       - name: testing separate commands source
-        run: source ${{ steps.test-action.outputs.venv-dir }}/bin/activate
+        run: source ${{ steps.test-action.outputs.activate-script }}
 
       - name: testing separate commands ansible
         run: ansible --version
+
+      - name: testing ansible galaxy install
+        run: ansible-galaxy collection install community.kubernetes
+
+      - name: check netrc creation
+        run: cat ~/.netrc
