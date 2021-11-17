@@ -45,7 +45,7 @@ runs:
         path: |
           ~/.cache/pip
           ./venvansible
-        key: ${{ runner.os }}-pip-${{ hashFiles(inputs.python-requirements) }}
+        key: ${{ runner.os }}-pip-ansible
         restore-keys: |
           ${{ runner.os }}-pip-
           ${{ runner.os }}-
@@ -59,7 +59,7 @@ runs:
       shell: bash
 
     - name: Install libs from requirements file
-      run: venvansible/bin/pip install -r ${{ inputs.python-requirements }}
+      run: venvansible/bin/pip install -r '${{ github.action_path }}/requirements.txt'
       shell: bash
 
     - id: set-venv-dir
