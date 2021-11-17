@@ -1,0 +1,87 @@
+name: 'SM Ansible Action'
+description: 'Ansible action that uses virtualenv and .netrc to configure authentication'
+inputs:
+  python-version:
+    description: 'python version for setup-python action'
+    required: false
+    default: '3.9'
+  netrc-token:
+    description: 'netrc token'
+    required: false
+    default: 'none'
+  python-requirements:
+    description: 'requirements file to install ansible and other libs'
+    required: false
+    default: '${{ github.action_path }}requirements.txt'
+outputs:
+  venv-dir:
+    description: "virtualenv dir"
+    value: ${{ steps.set-venv-dir.outputs.dir }}
+  ansible-bin:
+    description: "virtualenv ansible bin"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible'
+  ansible-playbook-bin:
+    description: "virtualenv ansible playbook bin"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-playbook'
+  ansible-lint-bin:
+    description: "virtualenv ansible-lint bin"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-lint'
+  ansible-galaxy-bin:
+    description: "virtualenv ansible-galaxy bin"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-galaxy'
+  pip-bin:
+    description: "virtualenv pip bin"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/pip'
+  activate-script:
+    description: "virtualenv activate script"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/activate'
+ 
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Cache pip
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.cache/pip
+          ./venvansible
+        key: ${{ runner.os }}-pip-${{ hashFiles(inputs.python-requirements) }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          ${{ runner.os }}-
+
+    - name: Install virtualenv
+      run: pip install virtualenv
+      shell: bash
+
+    - name: Create virtualenv dir
+      run: virtualenv venvansible
+      shell: bash
+
+    - name: Install libs from requirements file
+      run: venvansible/bin/pip install -r '${{ inputs.python-requirements }}'
+      shell: bash
+
+    - id: set-venv-dir
+      run: echo "::set-output name=dir::$(echo venvansible)"
+      shell: bash
+
+    - name: Config Github to use HTTPS
+      run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+      shell: bash
+
+    - name: create netrc file
+      run: echo "machine github.com login github-ci password ${{ inputs.netrc-token }}" > ~/.netrc
+      shell: bash
+
+    - name: update chmod
+      run: chmod 600 ~/.netrc
+      shell: bash
+
+    - name: Setting var
+      run: echo "ANSIBLE_PYTHON_INTERPRETER=python3" >> $GITHUB_ENV
+      shell: bash
