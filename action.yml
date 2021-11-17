@@ -9,10 +9,29 @@ inputs:
     description: 'netrc token'
     required: false
     default: 'none'
+  python-requirements:
+    description: 'requirements file to install ansible and other libs'
+    required: false
+    default: '${{ github.action_path }}/requirements.txt'
 outputs:
   venv-dir:
     description: "virtualenv dir"
     value: ${{ steps.set-venv-dir.outputs.dir }}
+  venv-ansible-bin:
+    description: "virtualenv ansible bin"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible'
+  venv-ansible-lint-bin:
+    description: "virtualenv ansible-lint bin"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-lint'
+  venv-ansible-galaxy-bin:
+    description: "virtualenv ansible-galaxy bin"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-galaxy'
+  venv-pip-bin:
+    description: "virtualenv pip bin"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/pip'
+  venv-activate-script:
+    description: "virtualenv activate script"
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/activate'
 runs:
   using: "composite"
   steps:
@@ -26,7 +45,7 @@ runs:
         path: |
           ~/.cache/pip
           ./venvansible
-        key: ${{ runner.os }}-pip-ansible
+        key: ${{ runner.os }}-pip-${{ hashFiles(${{ inputs.python-requirements }}) }}
         restore-keys: |
           ${{ runner.os }}-pip-
           ${{ runner.os }}-
@@ -39,8 +58,8 @@ runs:
       run: virtualenv venvansible
       shell: bash
 
-    - name: Create virtualenv dir
-      run: venvansible/bin/pip install ansible awscli cfn-lint
+    - name: Install libs from requirements file
+      run: venvansible/bin/pip install -r ${{ inputs.python-requirements }}
       shell: bash
 
     - id: set-venv-dir
@@ -61,8 +80,4 @@ runs:
 
     - name: Setting var
       run: echo "ANSIBLE_PYTHON_INTERPRETER=python3" >> $GITHUB_ENV
-      shell: bash
-
-    - name: Setting var
-      run: venvansible/bin/ansible --version
       shell: bash
