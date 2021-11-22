@@ -28,10 +28,17 @@ jobs:
         run: source ${{ steps.test-action.outputs.activate-script }}
 
       - name: testing separate commands ansible
-        run: ansible --version
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          ansible --version
 
       - name: testing ansible galaxy install
-        run: ansible-galaxy collection install community.kubernetes
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          ansible-galaxy collection install community.kubernetes
 
       - name: check netrc creation
         run: cat ~/.netrc
+        
+      - name: check output path
+        run: ls -l ${{ steps.test-action.outputs.pip-bin }}
