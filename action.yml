@@ -16,25 +16,25 @@ inputs:
 outputs:
   venv-dir:
     description: "virtualenv dir"
-    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}'
+    value: '${{ steps.set-venv-dir.outputs.dir }}'
   ansible-bin:
     description: "virtualenv ansible bin"
-    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/ansible'
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible'
   ansible-playbook-bin:
     description: "virtualenv ansible playbook bin"
-    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-playbook'
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-playbook'
   ansible-lint-bin:
     description: "virtualenv ansible-lint bin"
-    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-lint'
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-lint'
   ansible-galaxy-bin:
     description: "virtualenv ansible-galaxy bin"
-    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-galaxy'
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-galaxy'
   pip-bin:
     description: "virtualenv pip bin"
-    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/pip'
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/pip'
   activate-script:
     description: "virtualenv activate script"
-    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/activate'
+    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/activate'
  
 runs:
   using: "composite"
@@ -53,12 +53,16 @@ runs:
             echo "::set-output name=req-path::$(echo ${{ inputs.python-requirements }})"
         fi
 
+    - id: set-venv-dir
+      run: echo "::set-output name=dir::$(echo ${{ github.workspace }}/venvansible)"
+      shell: bash
+
     - name: Cache pip
       uses: actions/cache@v2
       with:
         path: |
           ~/.cache/pip
-          ./venvansible
+          ${{ steps.set-venv-dir.outputs.dir }}
         key: ${{ runner.os }}-pip-${{ hashFiles(steps.check-req-input.outputs.req-path) }}
         restore-keys: |
           ${{ runner.os }}-pip-
@@ -69,15 +73,11 @@ runs:
       shell: bash
 
     - name: Create virtualenv dir
-      run: virtualenv venvansible
+      run: virtualenv ${{ steps.set-venv-dir.outputs.dir }}
       shell: bash
 
     - name: Install libs from requirements file
-      run: venvansible/bin/pip install -r '${{ steps.check-req-input.outputs.req-path }}'
-      shell: bash
-
-    - id: set-venv-dir
-      run: echo "::set-output name=dir::$(echo venvansible)"
+      run: ${{ steps.set-venv-dir.outputs.dir }}/bin/pip install -r '${{ steps.check-req-input.outputs.req-path }}'
       shell: bash
 
     - name: Config Github to use HTTPS
@@ -85,11 +85,12 @@ runs:
       shell: bash
 
     - name: create netrc file
-      run: echo "machine github.com login github-ci password ${{ inputs.netrc-token }}" > ~/.netrc
-      shell: bash
-
-    - name: update chmod
-      run: chmod 600 ~/.netrc
+      run: |
+        if [[ "x-${{ inputs.netrc-token }}" != "x-none" ]]
+        then
+            echo "machine github.com login github-ci password ${{ inputs.netrc-token }}" > ~/.netrc
+            chmod 600 ~/.netrc
+        fi
       shell: bash
 
     - name: Setting var
