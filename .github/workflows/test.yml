@@ -45,7 +45,7 @@ jobs:
 
       - run: python3 --version
 
-      - name: Ansible action default
+      - name: Ansible action custom
         id: test-action
         uses: ./
         with:
