@@ -52,10 +52,14 @@ runs:
       run: |
         if [[ "x-${{ inputs.python-requirements }}" == "x-not-set" ]]
         then
-            echo "::set-output name=req-path::$(echo ${{ github.action_path }}/requirements.txt|sed -E 's|\.\/\/requirements|requirements|g')"
+            REQ_PATH=$(echo ${{ github.action_path }}/requirements.txt|sed -E 's|\.\/\/requirements|requirements|g')
+            echo "::set-output name=req-path::$REQ_PATH"
+            SHA256=$(sha256sum $REQ_PATH |awk '{print $1}')
         else
             echo "::set-output name=req-path::$(echo ${{ inputs.python-requirements }})"
+            SHA256=$(sha256sum ${{ inputs.python-requirements }} |awk '{print $1}')
         fi
+        echo "::set-output name=req-sha256::$SHA256"
 
     - id: set-venv-dir
       run: echo "::set-output name=dir::$(echo ${{ github.workspace }}/venvansible)"
@@ -67,7 +71,7 @@ runs:
         path: |
           ~/.cache/pip
           ${{ steps.set-venv-dir.outputs.dir }}
-        key: ${{ runner.os }}-pip-${{ hashFiles(steps.check-req-input.outputs.req-path) }}
+        key: ${{ runner.os }}-pip-${{ steps.check-req-input.outputs.req-sha256 }}
         restore-keys: |
           ${{ runner.os }}-pip-
           ${{ runner.os }}-
