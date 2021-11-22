@@ -19,29 +19,31 @@ jobs:
 
       - name: ansible-action
         id: test-action
-        uses: actions/searchmetrics/sm-ansible-action@v0.0.1
+        uses: searchmetrics/sm-ansible-action@v0.0.2
         with:
           python-version: '3.9'
           python-requirements: ./requirements.txt
-          netrc-token: ${{ secrets.GITHUB_TOKEN }}
+          ansible-roles: test_files/roles.yml
+          netrc-token: ${{ secrets.CI_GITHUB_TOKEN }}
 
       - name: testing ansible bin output
         run: ${{ steps.test-action.outputs.ansible-bin }} --version
       ## You can also use virtual env
-      - name: activating venv
-        run: source ${{ steps.test-action.outputs.activate-script }}
-
       - name: testing separate commands ansible
-        run: ansible --version
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          ansible --version
 
       - name: testing ansible galaxy install
-        run: ansible-galaxy collection install community.kubernetes
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          ansible-galaxy collection install community.kubernetes
         
       - name: testing ansible galaxy install
-        run: ansible-playbook super-play.yml
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          ansible-playbook super-play.yml
       
-      - name: deactivate venv
-        run: deactivate
 ```
 ## Inputs
 
@@ -50,9 +52,9 @@ This action supports the following inputs:
 | Key                        | Required | Description                                                                                                                                                                |
 | -------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `python-version`                 | Optional | python version for setup-python action. Defaults to 3.9                                                            |
-| `netrc-token`        | Optional | netrc token for private repos: Defaults to none                           |
-| `python-requirements`            | Optional | requirements file to install ansible and other libs. Defaults to requirements.txt from the action root |path`.                                                                                     |
-
+| `netrc-token`        | Optional | netrc token for private repos: Defaults to `not-set` which doesn't create the file                           |
+| `python-requirements`            | Optional | requirements file to install ansible and other libs. Defaults to `not-set` which uses the requirements.txt from the action root |path`.                                                                                     |
+| `ansible-roles`            | Optional | Ansible roles file to install playbook dependencies. Defaults to `not-set` skip execution of ansible-galaxy`.                                                                                     |
 ## Exported vars
 All variables from Setup-python action plus:
 
@@ -75,5 +77,3 @@ This action supports the following inputs:
 
 ## Todo
 * Review doc
-* Improve netrc configuration to avoid other git operations issues
-  
