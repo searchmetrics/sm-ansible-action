@@ -63,7 +63,7 @@ jobs:
         run: grep github-ci ~/.netrc
 
       - name: Check roles install
-        run: ls -l ~/.ansible/roles | ansible-mdadm
+        run: ls -l ~/.ansible/roles | grep ansible-mdadm
 
       - name: Testing requirements install
         run: |
