@@ -16,25 +16,25 @@ inputs:
 outputs:
   venv-dir:
     description: "virtualenv dir"
-    value: ${{ steps.set-venv-dir.outputs.dir }}
+    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}'
   ansible-bin:
     description: "virtualenv ansible bin"
-    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible'
+    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/ansible'
   ansible-playbook-bin:
     description: "virtualenv ansible playbook bin"
-    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-playbook'
+    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-playbook'
   ansible-lint-bin:
     description: "virtualenv ansible-lint bin"
-    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-lint'
+    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-lint'
   ansible-galaxy-bin:
     description: "virtualenv ansible-galaxy bin"
-    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-galaxy'
+    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-galaxy'
   pip-bin:
     description: "virtualenv pip bin"
-    value: '${{ github.workspace }}${{ steps.set-venv-dir.outputs.dir }}/bin/pip'
+    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/pip'
   activate-script:
     description: "virtualenv activate script"
-    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/activate'
+    value: '${{ github.workspace }}/${{ steps.set-venv-dir.outputs.dir }}/bin/activate'
  
 runs:
   using: "composite"
