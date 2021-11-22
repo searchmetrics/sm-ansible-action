@@ -52,7 +52,7 @@ runs:
       run: |
         if [[ "x-${{ inputs.python-requirements }}" == "x-not-set" ]]
         then
-            echo "::set-output name=req-path::$(echo ${{ github.action_path }}/requirements.txt)"
+            echo "::set-output name=req-path::$(echo ${{ github.action_path }}/requirements.txt|sed -E 's|\.\/\/|\/|g')"
         else
             echo "::set-output name=req-path::$(echo ${{ inputs.python-requirements }})"
         fi
