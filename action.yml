@@ -31,7 +31,7 @@ outputs:
     value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible-galaxy'
   pip-bin:
     description: "virtualenv pip bin"
-    value: '${{ steps.set-venv-dir.outputs.dir }}/bin/pip'
+    value: '${{ github.workspace }}${{ steps.set-venv-dir.outputs.dir }}/bin/pip'
   activate-script:
     description: "virtualenv activate script"
     value: '${{ steps.set-venv-dir.outputs.dir }}/bin/activate'
@@ -43,13 +43,23 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
+    - id: check-req-input
+      shell: bash
+      run: |
+        if [ "x-${{ inputs.python-requirements }}" == "x-requirements.txt"] 
+        then
+            echo "::set-output name=req-path::$(echo ${{ github.action_path }}requirements.txt)"
+        else
+            echo "::set-output name=req-path::$(echo ${{ inputs.python-requirements }})"
+        fi
+
     - name: Cache pip
       uses: actions/cache@v2
       with:
         path: |
           ~/.cache/pip
           ./venvansible
-        key: ${{ runner.os }}-pip-${{ hashFiles(inputs.python-requirements) }}
+        key: ${{ runner.os }}-pip-${{ hashFiles(steps.check-req-input.outputs.req-path) }}
         restore-keys: |
           ${{ runner.os }}-pip-
           ${{ runner.os }}-
@@ -63,7 +73,7 @@ runs:
       shell: bash
 
     - name: Install libs from requirements file
-      run: venvansible/bin/pip install -r '${{ inputs.python-requirements }}'
+      run: venvansible/bin/pip install -r '${{ steps.check-req-input.outputs.req-path }}'
       shell: bash
 
     - id: set-venv-dir
