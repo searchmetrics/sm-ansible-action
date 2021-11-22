@@ -12,7 +12,7 @@ inputs:
   python-requirements:
     description: 'requirements file to install ansible and other libs'
     required: false
-    default: '${{ github.action_path }}requirements.txt'
+    default: 'sm-action-default-requirements.txt'
 outputs:
   venv-dir:
     description: "virtualenv dir"
@@ -46,7 +46,7 @@ runs:
     - id: check-req-input
       shell: bash
       run: |
-        if [ "x-${{ inputs.python-requirements }}" == "x-requirements.txt"] 
+        if [[ "x-${{ inputs.python-requirements }}" == "x-sm-action-default-requirements.txt" ]]
         then
             echo "::set-output name=req-path::$(echo ${{ github.action_path }}requirements.txt)"
         else
