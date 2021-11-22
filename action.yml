@@ -8,15 +8,19 @@ inputs:
   netrc-token:
     description: 'netrc token'
     required: false
-    default: 'none'
+    default: 'not-set'
   python-requirements:
     description: 'requirements file to install ansible and other libs'
     required: false
-    default: '${{ github.action_path }}requirements.txt'
+    default: 'not-set'
+  ansible-roles:
+    description: 'Ansible roles file to install playbook dependencies'
+    required: false
+    default: 'not-set'
 outputs:
   venv-dir:
     description: "virtualenv dir"
-    value: ${{ steps.set-venv-dir.outputs.dir }}
+    value: '${{ steps.set-venv-dir.outputs.dir }}'
   ansible-bin:
     description: "virtualenv ansible bin"
     value: '${{ steps.set-venv-dir.outputs.dir }}/bin/ansible'
@@ -43,13 +47,33 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
+    - id: check-req-input
+      shell: bash
+      run: |
+        if [[ "x-${{ inputs.python-requirements }}" == "x-not-set" ]]
+        then
+            REQ_PATH=$(echo ${{ github.action_path }}/requirements.txt|sed -E 's|\.\/\/requirements|requirements|g')
+            echo "::set-output name=req-path::$REQ_PATH"
+            SHA256=$(sha256sum $REQ_PATH |awk '{print $1}')
+        else
+            echo "::set-output name=req-path::$(echo ${{ inputs.python-requirements }})"
+            SHA256=$(sha256sum ${{ inputs.python-requirements }} |awk '{print $1}')
+        fi
+        echo "::set-output name=req-sha256::$SHA256"
+
+    - id: set-venv-dir
+      run: echo "::set-output name=dir::$(echo ${{ github.workspace }}/venvansible)"
+      shell: bash
+
     - name: Cache pip
       uses: actions/cache@v2
       with:
         path: |
           ~/.cache/pip
-          ./venvansible
-        key: ${{ runner.os }}-pip-${{ hashFiles(inputs.python-requirements) }}
+          ${{ steps.set-venv-dir.outputs.dir }}
+        # Using step sha256 as we can't use hashfiles for files that aren't part of the repositories workspaces
+        # See https://docs.github.com/en/actions/learn-github-actions/expressions#hashfiles
+        key: ${{ runner.os }}-pip-${{ steps.check-req-input.outputs.req-sha256 }}
         restore-keys: |
           ${{ runner.os }}-pip-
           ${{ runner.os }}-
@@ -59,15 +83,11 @@ runs:
       shell: bash
 
     - name: Create virtualenv dir
-      run: virtualenv venvansible
+      run: virtualenv ${{ steps.set-venv-dir.outputs.dir }}
       shell: bash
 
     - name: Install libs from requirements file
-      run: venvansible/bin/pip install -r '${{ inputs.python-requirements }}'
-      shell: bash
-
-    - id: set-venv-dir
-      run: echo "::set-output name=dir::$(echo venvansible)"
+      run: ${{ steps.set-venv-dir.outputs.dir }}/bin/pip install -r '${{ steps.check-req-input.outputs.req-path }}'
       shell: bash
 
     - name: Config Github to use HTTPS
@@ -75,13 +95,25 @@ runs:
       shell: bash
 
     - name: create netrc file
-      run: echo "machine github.com login github-ci password ${{ inputs.netrc-token }}" > ~/.netrc
-      shell: bash
-
-    - name: update chmod
-      run: chmod 600 ~/.netrc
+      run: |
+        if [[ "x-${{ inputs.netrc-token }}" != "x-not-set" ]]
+        then
+            echo "machine github.com login github-ci password ${{ inputs.netrc-token }}" > ~/.netrc
+            chmod 600 ~/.netrc
+        fi
       shell: bash
 
     - name: Setting var
       run: echo "ANSIBLE_PYTHON_INTERPRETER=python3" >> $GITHUB_ENV
       shell: bash
+
+    - name: Install ansible roles
+      shell: bash
+      run: |
+        if [[ "x-${{ inputs.ansible-roles }}" != "x-not-set" ]]
+        then
+            source ${{ steps.set-venv-dir.outputs.dir }}/bin/activate
+            ansible-galaxy install -f -r ${{ inputs.ansible-roles }}
+        else
+            echo "Skipping exec"
+        fi
