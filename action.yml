@@ -71,6 +71,8 @@ runs:
         path: |
           ~/.cache/pip
           ${{ steps.set-venv-dir.outputs.dir }}
+        # Using step sha256 as we can't use hashfiles for files that aren't part of the repositories workspaces
+        # See https://docs.github.com/en/actions/learn-github-actions/expressions#hashfiles
         key: ${{ runner.os }}-pip-${{ steps.check-req-input.outputs.req-sha256 }}
         restore-keys: |
           ${{ runner.os }}-pip-
