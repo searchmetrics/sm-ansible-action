@@ -51,7 +51,7 @@ jobs:
         with:
           python-version: '3.10'
           python-requirements: test_files/requirements.txt
-          ansible-roles: test_files/roles.txt
+          ansible-roles: test_files/roles.yml
           netrc-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check python custom version
