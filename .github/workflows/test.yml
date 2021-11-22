@@ -14,7 +14,7 @@ jobs:
         uses: ./
         with:
           python-version: '3.10'
-          python-requirements: ./requirements.txt
+          # python-requirements: ./requirements.txt
           netrc-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: python3 --version
@@ -39,6 +39,6 @@ jobs:
 
       - name: check netrc creation
         run: cat ~/.netrc
-        
+
       - name: check output path
         run: ls -l ${{ steps.test-action.outputs.pip-bin }}
