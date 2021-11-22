@@ -1,0 +1,4 @@
+roles:
+  - name: ansible-mdadm
+    src: mrlesmithjr.mdadm
+    version: "v0.1.1"
