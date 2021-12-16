@@ -83,7 +83,7 @@ runs:
       shell: bash
 
     - name: Create virtualenv dir
-      run: virtualenv ${{ steps.set-venv-dir.outputs.dir }} || virtualenv --upgrade ${{ steps.set-venv-dir.outputs.dir }}
+      run: virtualenv ${{ steps.set-venv-dir.outputs.dir }} || virtualenv --upgrade --upgrade-embed-wheels ${{ steps.set-venv-dir.outputs.dir }}
       shell: bash
 
     - name: Install libs from requirements file
