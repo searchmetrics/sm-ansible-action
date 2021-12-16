@@ -69,3 +69,41 @@ jobs:
         run: |
           source ${{ steps.test-action.outputs.activate-script }}
           pip list | grep cfn-lint
+
+  test_action_python_update_base:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Ansible action custom
+        id: test-action
+        uses: ./
+        with:
+          python-version: '3.9.8'
+      - run: python3 --version | grep '3.9.8'
+
+  test_action_python_update_patch:
+    needs: test_action_python_update_base
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Ansible action custom
+        id: test-action
+        uses: ./
+        with:
+          python-version: '3.9.9'
+      - run: python3 --version | grep '3.9.9'
+
+  test_action_python_update_minor:
+    needs: test_action_python_update_base
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Ansible action custom
+        id: test-action
+        uses: ./
+        with:
+          python-version: '3.10.0'
+      - run: python3 --version | grep '3.10.0'
