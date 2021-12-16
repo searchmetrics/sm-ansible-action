@@ -72,6 +72,8 @@ jobs:
 
   test_action_python_update_base:
     # needs: test_action_with_defaults
+    env:
+      TEST_PYTHON: 3.9.8
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -80,11 +82,16 @@ jobs:
         id: test-action
         uses: ./
         with:
-          python-version: '3.9.8'
-      - run: python3 --version | grep '3.9.8'
-
+          python-version: '${{ env.TEST_PYTHON }}'
+      - run: python3 --version | grep ${{ env.TEST_PYTHON }}
+      - name: Testing requirements install
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          python --version | grep ${{ env.TEST_PYTHON }}
   test_action_python_update_patch:
     needs: test_action_python_update_base
+    env:
+      TEST_PYTHON: 3.9.9
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -93,8 +100,12 @@ jobs:
         id: test-action
         uses: ./
         with:
-          python-version: '3.9.8'
-      - run: python3 --version | grep '3.9.8'
+          python-version: '${{ env.TEST_PYTHON }}'
+      - run: python3 --version | grep ${{ env.TEST_PYTHON }}
+      - name: Testing requirements install
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          python --version | grep ${{ env.TEST_PYTHON }}
 
   # test_action_python_downgrade_minor:
   #   needs: test_action_python_update_base
