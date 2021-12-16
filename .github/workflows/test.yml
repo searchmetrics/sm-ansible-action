@@ -2,81 +2,83 @@ name: test
 on: [push]
 
 jobs:
-  # test_action_with_defaults:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
+  test_action_with_defaults:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - run: python3 --version
+      - run: python3 --version
 
-  #     - name: Ansible action default
-  #       id: test-action
-  #       uses: ./
+      - name: Ansible action default
+        id: test-action
+        uses: ./
 
-  #     - name: Check environment var
-  #       run: echo $ANSIBLE_PYTHON_INTERPRETER | grep python3
+      - name: Check environment var
+        run: echo $ANSIBLE_PYTHON_INTERPRETER | grep python3
 
-  #     - name: testing ansible bin output
-  #       run: ${{ steps.test-action.outputs.ansible-bin }} --version
+      - name: testing ansible bin output
+        run: ${{ steps.test-action.outputs.ansible-bin }} --version
 
-  #     - name: Check python default version
-  #       run: |
-  #         source ${{ steps.test-action.outputs.activate-script }}
-  #         python --version | grep 3.9
+      - name: Check python default version
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          python --version | grep 3.9
 
-  #     - name: testing separate commands ansible
-  #       run: |
-  #         source ${{ steps.test-action.outputs.activate-script }}
-  #         ansible --version
+      - name: testing separate commands ansible
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          ansible --version
 
-  #     - name: testing ansible galaxy install
-  #       run: |
-  #         source ${{ steps.test-action.outputs.activate-script }}
-  #         ansible-galaxy collection install community.kubernetes
+      - name: testing ansible galaxy install
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          ansible-galaxy collection install community.kubernetes
 
-  #     - name: check output path from anywhere
-  #       run: ls -l ${{ steps.test-action.outputs.pip-bin }}
-  #       working-directory: test_files
+      - name: check output path from anywhere
+        run: ls -l ${{ steps.test-action.outputs.pip-bin }}
+        working-directory: test_files
 
-  # test_action_with_custom_inputs:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
+  test_action_with_custom_inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - run: python3 --version
+      - run: python3 --version
 
-  #     - name: Ansible action custom
-  #       id: test-action
-  #       uses: ./
-  #       with:
-  #         python-version: '3.10'
-  #         python-requirements: test_files/requirements.txt
-  #         ansible-roles: test_files/roles.yml
-  #         netrc-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Ansible action custom
+        id: test-action
+        uses: ./
+        with:
+          python-version: '3.10'
+          python-requirements: test_files/requirements.txt
+          ansible-roles: test_files/roles.yml
+          netrc-token: ${{ secrets.GITHUB_TOKEN }}
 
-  #     - name: Check python custom version
-  #       run: |
-  #         source ${{ steps.test-action.outputs.activate-script }}
-  #         python --version | grep 3.10
+      - name: Check python custom version
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          python --version | grep 3.10
 
-  #     - name: check netrc creation
-  #       run: grep github-ci ~/.netrc
+      - name: check netrc creation
+        run: grep github-ci ~/.netrc
 
-  #     - name: Check roles install
-  #       run: ls -l ~/.ansible/roles | grep ansible-mdadm
+      - name: Check roles install
+        run: ls -l ~/.ansible/roles | grep ansible-mdadm
 
-  #     - name: Testing requirements install
-  #       run: |
-  #         source ${{ steps.test-action.outputs.activate-script }}
-  #         pip list | grep cfn-lint
+      - name: Testing requirements install
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          pip list | grep cfn-lint
 
   test_action_python_update_base:
-    # needs: test_action_with_defaults
+    needs: test_action_with_defaults
     env:
       TEST_PYTHON: 3.9.8
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - run: echo '#change-reqs' >> requirements.txt
 
       - name: Ansible action custom
         id: test-action
@@ -96,6 +98,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - run: echo '#change-reqs' >> requirements.txt
+
       - name: Ansible action custom
         id: test-action
         uses: ./
@@ -107,15 +111,46 @@ jobs:
           source ${{ steps.test-action.outputs.activate-script }}
           python --version | grep ${{ env.TEST_PYTHON }}
 
-  # test_action_python_downgrade_minor:
-  #   needs: test_action_python_update_base
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
+  test_action_python_downgrade_minor:
+    needs: test_action_python_update_base
+    runs-on: ubuntu-latest
+    env:
+      TEST_PYTHON: 3.8.7
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Ansible action custom
-  #       id: test-action
-  #       uses: ./
-  #       with:
-  #         python-version: '3.9.8'
-  #     - run: python3 --version | grep '3.9.8'
+      - run: echo '#change-reqs' >> requirements.txt
+
+      - name: Ansible action custom
+        id: test-action
+        uses: ./
+        with:
+          python-version: '${{ env.TEST_PYTHON }}'
+      - run: python3 --version | grep ${{ env.TEST_PYTHON }}
+      - name: Testing requirements install
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          python --version | grep ${{ env.TEST_PYTHON }}
+
+  test_action_python_upgrading_minor:
+    needs: test_action_python_update_base
+    runs-on: ubuntu-latest
+    env:
+      TEST_PYTHON: 3.10.0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: echo '#change-reqs' >> requirements.txt
+
+      - name: Ansible action custom
+        id: test-action
+        uses: ./
+        with:
+          python-version: '${{ env.TEST_PYTHON }}'
+      - run: python3 --version | grep ${{ env.TEST_PYTHON }}
+      - name: Testing requirements install
+        run: |
+          source ${{ steps.test-action.outputs.activate-script }}
+          python --version | grep ${{ env.TEST_PYTHON }}
