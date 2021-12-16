@@ -59,7 +59,7 @@ runs:
             echo "::set-output name=req-path::$(echo ${{ inputs.python-requirements }})"
             SHA256=$(sha256sum ${{ inputs.python-requirements }} |awk '{print $1}')
         fi
-        echo "::set-output name=req-sha256::A$SHA256"
+        echo "::set-output name=req-sha256::B$SHA256"
 
     - id: set-venv-dir
       run: echo "::set-output name=dir::$(echo ${{ github.workspace }}/venvansible)"
