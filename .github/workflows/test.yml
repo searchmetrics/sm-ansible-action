@@ -71,6 +71,7 @@ jobs:
           pip list | grep cfn-lint
 
   test_action_python_update_base:
+    needs: test_action_with_defaults
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -79,8 +80,8 @@ jobs:
         id: test-action
         uses: ./
         with:
-          python-version: '3.9.8'
-      - run: python3 --version | grep '3.9.8'
+          python-version: '3.10.0'
+      - run: python3 --version | grep '3.10.0'
 
   test_action_python_update_patch:
     needs: test_action_python_update_base
@@ -92,10 +93,10 @@ jobs:
         id: test-action
         uses: ./
         with:
-          python-version: '3.9.9'
-      - run: python3 --version | grep '3.9.9'
+          python-version: '3.10.1'
+      - run: python3 --version | grep '3.10.1'
 
-  test_action_python_update_minor:
+  test_action_python_downgrade_minor:
     needs: test_action_python_update_base
     runs-on: ubuntu-latest
     steps:
@@ -105,5 +106,5 @@ jobs:
         id: test-action
         uses: ./
         with:
-          python-version: '3.10.0'
-      - run: python3 --version | grep '3.10.0'
+          python-version: '3.9.8'
+      - run: python3 --version | grep '3.9.8'
