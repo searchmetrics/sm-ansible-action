@@ -86,8 +86,8 @@ runs:
       run: virtualenv ${{ steps.set-venv-dir.outputs.dir }} || virtualenv --clear ${{ steps.set-venv-dir.outputs.dir }}
       shell: bash
 
-    - name: Upgrade setuptools
-      run: ${{ steps.set-venv-dir.outputs.dir }}/bin/pip install --upgrade setuptools
+    - name: Upgrade pip
+      run: ${{ steps.set-venv-dir.outputs.dir }}/bin/python -m pip install --upgrade pip
       shell: bash
 
     - name: Install libs from requirements file
