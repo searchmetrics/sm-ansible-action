@@ -1,3 +1,4 @@
 ansible
 ansible-lint
 cfn-lint
+functools32 ; python_version=='2.7'
