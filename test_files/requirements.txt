@@ -1,4 +1,3 @@
 ansible
 ansible-lint
 cfn-lint
-functools32==3.2.3-1
