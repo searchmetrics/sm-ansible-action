@@ -87,7 +87,7 @@ runs:
       shell: bash
 
     - name: Install libs from requirements file
-      run: ${{ steps.set-venv-dir.outputs.dir }}/bin/pip install -r '${{ steps.check-req-input.outputs.req-path }}'
+      run: ${{ steps.set-venv-dir.outputs.dir }}/bin/pip3 install -r '${{ steps.check-req-input.outputs.req-path }}'
       shell: bash
 
     - name: Config Github to use HTTPS

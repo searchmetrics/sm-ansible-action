@@ -49,7 +49,7 @@ jobs:
         id: test-action
         uses: ./
         with:
-          python-version: '3.11-dev'
+          python-version: '3.10'
           python-requirements: test_files/requirements.txt
           ansible-roles: test_files/roles.yml
           netrc-token: ${{ secrets.GITHUB_TOKEN }}
