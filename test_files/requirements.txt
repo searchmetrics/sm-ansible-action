@@ -1,3 +1,3 @@
 ansible
 ansible-lint
-cfn-lint
+cfn-lint>=0.60.0
