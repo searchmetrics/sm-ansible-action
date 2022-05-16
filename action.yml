@@ -79,7 +79,7 @@ runs:
           ${{ runner.os }}-
 
     - name: Install virtualenv
-      run: pip install virtualenv
+      run: pip install --upgrade virtualenv
       shell: bash
 
     - name: Create virtualenv dir
